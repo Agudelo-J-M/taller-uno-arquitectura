@@ -20,3 +20,8 @@ Primera entrega: modelado de la **API Festivos** (Express JS + MongoDB).
 | Diagrama de arquitectura por capas | [diagrama-arquitectura-api-festivos.md](diagrama-arquitectura-api-festivos.md) |
 
 Los diagramas están escritos en Mermaid y se renderizan directamente en GitHub.
+
+## Base de datos
+
+Script de `mongosh` que carga la colección `tipos` con los datos para calcular los
+festivos: [BDFestivos.mjs](BDFestivos.mjs)
