@@ -85,11 +85,11 @@ solo recorren los pasos 1 a 9 y 12 a 13, sin pasar por el Servicio de Cálculo d
 | Agregar un festivo | POST | `/api/festivos/agregar` (el cuerpo indica el `id` del tipo) |
 | Modificar un festivo | PUT | `/api/festivos/modificar/:id` |
 | Eliminar un festivo | DELETE | `/api/festivos/:id` |
-
-El `:id` de estas rutas es el `id` del festivo, único entre todos los festivos de la
-colección (ver [diagrama objetual](diagrama-objetual-api-festivos.md)).
 | Verificar si una fecha es festiva | GET | `/api/festivos/verificar/:anio/:mes/:dia` |
 | Listar los festivos de un año | GET | `/api/festivos/obtener/:anio` |
+
+El `:id` de las rutas de obtener, modificar y eliminar es el `id` del festivo, único entre
+todos los festivos de la colección (ver [diagrama objetual](diagrama-objetual-api-festivos.md)).
 
 El CRUD opera sobre los datos de cálculo de los festivos, no sobre fechas. No hay CRUD
 para los tipos de festivo, porque en Colombia solo existen los 4 tipos ya definidos. Por ejemplo,
