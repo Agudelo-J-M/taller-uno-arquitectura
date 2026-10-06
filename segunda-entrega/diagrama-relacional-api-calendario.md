@@ -17,7 +17,7 @@ erDiagram
 
     CALENDARIO {
         serial Id PK
-        date Fecha
+        date Fecha UK
         int IdTipo FK
         varchar Descripcion
     }
@@ -40,18 +40,22 @@ Registros:
 | 2 | Fin de semana | Sábado o domingo que no es festivo |
 | 3 | Día festivo | Fecha incluida en la lista de festivos del año que entrega la API Festivos |
 
-Los ids 1 y 3 son los que aparecen en la respuesta de ejemplo del enunciado; el 2 es el
-restante.
+Los ids coinciden con la respuesta de ejemplo del enunciado, donde el *Día laboral* tiene
+id 1 y el *Día festivo* id 3. El *Fin de semana* toma el id 2.
 
 ### Calendario
 
 | Columna | Tipo | Descripción |
 |---|---|---|
 | Id | serial | Identificador autonumérico del día |
-| Fecha | date | Fecha del día |
+| Fecha | date | Fecha del día. Es única (`UK`): cada día se guarda una sola vez |
 | IdTipo | int | Llave foránea hacia `Tipo` |
 | Descripcion | varchar | Nombre del día de la semana (Lunes, Martes, ..., Domingo) |
 
 Un festivo tiene prioridad sobre el fin de semana. Por ejemplo, el 1 de enero de 2023
 cae domingo y se clasifica como *Día festivo* con descripción *Domingo*, tal como aparece
 en la respuesta de ejemplo del enunciado.
+
+La restricción única sobre `Fecha` garantiza en la base de datos que generar el mismo año
+dos veces no duplique días, además del borrado previo que hace la API (ver el
+[flujo de generar el calendario](diagrama-arquitectura-api-calendario.md#flujo-de-generar-el-calendario)).
