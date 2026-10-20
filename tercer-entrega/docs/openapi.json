@@ -1,0 +1,186 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API Festivos",
+    "version": "1.0.0",
+    "description": "API RESTful en Express JS sobre MongoDB que administra los datos para calcular los festivos de Colombia, verifica si una fecha es festiva y lista los festivos de un año."
+  },
+  "servers": [{ "url": "http://localhost:3030" }],
+  "tags": [
+    { "name": "Festivos", "description": "CRUD de los datos de cálculo de los festivos" },
+    { "name": "Fechas", "description": "Operaciones que calculan fechas festivas" }
+  ],
+  "paths": {
+    "/api/festivos": {
+      "get": {
+        "tags": ["Festivos"],
+        "summary": "Listar festivos",
+        "responses": {
+          "200": {
+            "description": "Lista de festivos con su tipo",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Festivo" } } } }
+          }
+        }
+      }
+    },
+    "/api/festivos/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/Id" }],
+      "get": {
+        "tags": ["Festivos"],
+        "summary": "Obtener un festivo",
+        "responses": {
+          "200": { "description": "Festivo encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Festivo" } } } },
+          "400": { "$ref": "#/components/responses/Invalido" },
+          "404": { "$ref": "#/components/responses/NoEncontrado" }
+        }
+      },
+      "delete": {
+        "tags": ["Festivos"],
+        "summary": "Eliminar un festivo",
+        "responses": {
+          "200": { "$ref": "#/components/responses/Mensaje" },
+          "400": { "$ref": "#/components/responses/Invalido" },
+          "404": { "$ref": "#/components/responses/NoEncontrado" }
+        }
+      }
+    },
+    "/api/festivos/agregar": {
+      "post": {
+        "tags": ["Festivos"],
+        "summary": "Agregar un festivo",
+        "description": "El cuerpo indica el id del tipo. Los tipos 1 y 2 requieren dia y mes; los tipos 3 y 4 requieren diasPascua. El id del festivo lo genera la API como el mayor id existente más 1.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/FestivoNuevo" },
+              "examples": {
+                "fijo": { "summary": "Tipo 2 (Ley de Puente festivo)", "value": { "idTipo": 2, "nombre": "Virgen de Chiquinquirá", "dia": 9, "mes": 7 } },
+                "pascua": { "summary": "Tipo 3 (Basado en el domingo de pascua)", "value": { "idTipo": 3, "nombre": "Domingo de Ramos", "diasPascua": -7 } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Festivo agregado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Festivo" } } } },
+          "400": { "$ref": "#/components/responses/Invalido" },
+          "404": { "$ref": "#/components/responses/NoEncontrado" }
+        }
+      }
+    },
+    "/api/festivos/modificar/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/Id" }],
+      "put": {
+        "tags": ["Festivos"],
+        "summary": "Modificar un festivo",
+        "description": "Reemplaza el nombre y los datos de cálculo del festivo. El tipo no se puede modificar.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/FestivoDatos" },
+              "example": { "nombre": "Día de la Diversidad Étnica y Cultural", "dia": 12, "mes": 10 }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Festivo modificado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Festivo" } } } },
+          "400": { "$ref": "#/components/responses/Invalido" },
+          "404": { "$ref": "#/components/responses/NoEncontrado" }
+        }
+      }
+    },
+    "/api/festivos/verificar/{anio}/{mes}/{dia}": {
+      "get": {
+        "tags": ["Fechas"],
+        "summary": "Verificar si una fecha es festiva",
+        "parameters": [
+          { "name": "anio", "in": "path", "required": true, "schema": { "type": "integer", "example": 2026 } },
+          { "name": "mes", "in": "path", "required": true, "schema": { "type": "integer", "example": 4 } },
+          { "name": "dia", "in": "path", "required": true, "schema": { "type": "integer", "example": 3 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado de la verificación",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Verificacion" } } }
+          },
+          "400": { "$ref": "#/components/responses/Invalido" }
+        }
+      }
+    },
+    "/api/festivos/obtener/{anio}": {
+      "get": {
+        "tags": ["Fechas"],
+        "summary": "Listar los festivos de un año",
+        "description": "Operación que consume la API Calendario.",
+        "parameters": [{ "name": "anio", "in": "path", "required": true, "schema": { "type": "integer", "example": 2026 } }],
+        "responses": {
+          "200": {
+            "description": "Festivos del año ordenados por fecha",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/FechaFestiva" } } } }
+          },
+          "400": { "$ref": "#/components/responses/Invalido" }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "Id": { "name": "id", "in": "path", "required": true, "description": "id del festivo", "schema": { "type": "integer", "minimum": 1 } }
+    },
+    "schemas": {
+      "FestivoDatos": {
+        "type": "object",
+        "required": ["nombre"],
+        "properties": {
+          "nombre": { "type": "string" },
+          "dia": { "type": "integer", "description": "Solo tipos 1 y 2" },
+          "mes": { "type": "integer", "description": "Solo tipos 1 y 2" },
+          "diasPascua": { "type": "integer", "description": "Solo tipos 3 y 4. Entre -80 y 249" }
+        }
+      },
+      "FestivoNuevo": {
+        "allOf": [
+          { "type": "object", "required": ["idTipo"], "properties": { "idTipo": { "type": "integer", "minimum": 1, "maximum": 4 } } },
+          { "$ref": "#/components/schemas/FestivoDatos" }
+        ]
+      },
+      "Festivo": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "nombre": { "type": "string", "example": "Año nuevo" },
+          "dia": { "type": "integer", "example": 1 },
+          "mes": { "type": "integer", "example": 1 },
+          "diasPascua": { "type": "integer", "description": "Solo existe en los tipos 3 y 4" },
+          "idTipo": { "type": "integer", "example": 1 },
+          "tipo": { "type": "string", "example": "Fijo" }
+        }
+      },
+      "FechaFestiva": {
+        "type": "object",
+        "properties": {
+          "fecha": { "type": "string", "format": "date", "example": "2026-01-01" },
+          "nombre": { "type": "string", "example": "Año nuevo" }
+        }
+      },
+      "Verificacion": {
+        "type": "object",
+        "properties": {
+          "fecha": { "type": "string", "format": "date", "example": "2026-04-03" },
+          "esFestivo": { "type": "boolean", "example": true },
+          "festivos": { "type": "array", "items": { "type": "string" }, "example": ["Viernes Santo"] }
+        }
+      },
+      "Mensaje": {
+        "type": "object",
+        "properties": { "mensaje": { "type": "string" } }
+      }
+    },
+    "responses": {
+      "Mensaje": { "description": "Operación realizada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Mensaje" } } } },
+      "Invalido": { "description": "Datos de entrada no válidos", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Mensaje" } } } },
+      "NoEncontrado": { "description": "Festivo o tipo no encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Mensaje" } } } }
+    }
+  }
+}

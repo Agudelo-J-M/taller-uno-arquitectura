@@ -36,4 +36,14 @@ festivo). Expone dos operaciones: `GET /api/calendario/generar/{anio}` y
 | Diagrama relacional del modelo de datos | [diagrama-relacional-api-calendario.md](segunda-entrega/diagrama-relacional-api-calendario.md) |
 | Diagrama de arquitectura onion | [diagrama-arquitectura-api-calendario.md](segunda-entrega/diagrama-arquitectura-api-calendario.md) |
 
-Los diagramas están escritos en Mermaid y se renderizan directamente en GitHub.
+## Tercera entrega (API Festivos: API ExpressJS + BD MongoDB)
+
+Implementación de la **API Festivos** modelada en la primera entrega, con arquitectura por
+capas sobre la colección `tipos` de MongoDB. Carpeta [tercer-entrega](tercer-entrega/).
+
+Incluye el CRUD de los festivos, la verificación de una fecha festiva y el listado de los
+festivos de un año que consume la API Calendario. Las instrucciones de ejecución y las
+operaciones están en su [README](tercer-entrega/README.md), y la documentación interactiva
+queda en Swagger UI (`/api-docs`).
+
+Los diagramas de la primera y segunda entrega están escritos en Mermaid y se renderizan directamente en GitHub.
