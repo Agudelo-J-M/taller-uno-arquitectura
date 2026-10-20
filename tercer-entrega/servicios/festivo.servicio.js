@@ -41,6 +41,9 @@ const validarDatosCalculo = (idTipo, datos) => {
     }
 }
 
+//Garantiza que todos los festivos tengan id, que es lo que usan las rutas del CRUD
+exports.asignarIdsFaltantes = () => tipoRepositorio.asignarIdsFaltantes();
+
 exports.listar = () => tipoRepositorio.listarFestivos();
 
 exports.obtener = async (id) => {
@@ -51,7 +54,17 @@ exports.obtener = async (id) => {
     return festivo;
 }
 
-exports.agregar = async (datos) => {
+//Las altas se procesan una a la vez: el id nuevo depende del mayor id existente,
+//y dos altas simultaneas podrian calcular el mismo.
+let colaAgregar = Promise.resolve();
+
+exports.agregar = (datos) => {
+    const resultado = colaAgregar.then(() => agregarFestivo(datos));
+    colaAgregar = resultado.catch(() => { });
+    return resultado;
+}
+
+const agregarFestivo = async (datos) => {
     const tipo = await tipoRepositorio.obtenerTipo(datos.idTipo);
     if (!tipo) {
         throw new ErrorApi(404, `No existe un tipo de festivo con id=${datos.idTipo}`);
@@ -116,15 +129,9 @@ exports.obtenerFestivosAnio = async (anio) => {
 //Verifica si una fecha es festiva
 exports.verificar = async (anio, mes, dia) => {
     if (!fechaServicio.esFechaValida(anio, mes, dia)) {
-        throw new ErrorApi(400, 'Fecha no válida');
+        return { valida: false, esFestivo: false };
     }
     const fecha = fechaServicio.formatear(fechaServicio.crearFecha(anio, mes, dia));
     const festivos = await exports.obtenerFestivosAnio(anio);
-    const coincidencias = festivos.filter((festivo) => festivo.fecha === fecha);
-
-    return {
-        fecha,
-        esFestivo: coincidencias.length > 0,
-        festivos: coincidencias.map((festivo) => festivo.nombre)
-    };
+    return { valida: true, esFestivo: festivos.some((festivo) => festivo.fecha === fecha) };
 }

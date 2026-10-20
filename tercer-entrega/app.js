@@ -3,6 +3,7 @@ const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 
 const bd = require('./modelos/bd');
+const festivoServicio = require('./servicios/festivo.servicio');
 const configApp = require('./configuracion/app.config');
 const documentacion = require('./docs/openapi.json');
 const manejadorErrores = require('./utilidades/manejador.errores');
@@ -29,9 +30,13 @@ app.use(manejadorErrores);
 const iniciar = async () => {
     try {
         await bd.conectar();
+        const asignados = await festivoServicio.asignarIdsFaltantes();
+        if (asignados > 0) {
+            console.log(`Se asignó id a ${asignados} festivos que no lo tenían`);
+        }
     }
     catch (err) {
-        console.error('No fue posible conectarse a la base de datos de MONGO', err.message);
+        console.error('No fue posible preparar la base de datos de MONGO', err.message);
         process.exit(1);
     }
     app.listen(configApp.PUERTO, () => {

@@ -21,19 +21,20 @@ const esFechaValida = (anio, mes, dia) => {
 //Suma (o resta, si el valor es negativo) dias a una fecha
 const agregarDias = (fecha, dias) => new Date(fecha.getTime() + dias * MS_POR_DIA);
 
-//Calcula el domingo de pascua de un anio:
+//Calcula el domingo de ramos de un anio:
 //a = Año MOD 19, b = Año MOD 4, c = Año MOD 7, d = (19a + 24) MOD 30
 //dias = d + ((2b + 4c + 6d + 5) MOD 7) son los dias despues del 15 de marzo
-//hasta el domingo de ramos, y el domingo de pascua es 7 dias despues.
-const obtenerDomingoPascua = (anio) => {
+const obtenerDomingoRamos = (anio) => {
     const a = anio % 19;
     const b = anio % 4;
     const c = anio % 7;
     const d = (19 * a + 24) % 30;
     const dias = d + ((2 * b + 4 * c + 6 * d + 5) % 7);
-    const domingoRamos = agregarDias(crearFecha(anio, 3, 15), dias);
-    return agregarDias(domingoRamos, 7);
+    return agregarDias(crearFecha(anio, 3, 15), dias);
 }
+
+//El domingo de pascua es 7 dias despues del domingo de ramos
+const obtenerDomingoPascua = (anio) => agregarDias(obtenerDomingoRamos(anio), 7);
 
 //Traslada una fecha al siguiente lunes. Si ya es lunes, se mantiene.
 const siguienteLunes = (fecha) => {
@@ -48,6 +49,7 @@ module.exports = {
     crearFecha,
     esFechaValida,
     agregarDias,
+    obtenerDomingoRamos,
     obtenerDomingoPascua,
     siguienteLunes,
     formatear

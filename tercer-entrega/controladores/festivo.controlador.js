@@ -39,10 +39,16 @@ exports.eliminar = async (req, res) => {
     res.send({ mensaje: `Se eliminó el festivo con id=${req.params.id}` });
 }
 
-//metodo web para verificar si una fecha es festiva
+//metodo web para verificar si una fecha es festiva.
+//Responde texto plano, como en los ejemplos del enunciado.
 exports.verificar = async (req, res) => {
     const { anio, mes, dia } = req.params;
-    res.send(await festivoServicio.verificar(Number(anio), Number(mes), Number(dia)));
+    const resultado = await festivoServicio.verificar(Number(anio), Number(mes), Number(dia));
+    let respuesta = 'Fecha No valida';
+    if (resultado.valida) {
+        respuesta = resultado.esFestivo ? 'Es Festivo' : 'No es festivo';
+    }
+    res.type('text').send(respuesta);
 }
 
 //metodo web para obtener los festivos de un año

@@ -53,7 +53,28 @@ exports.obtenerMayorIdFestivo = async () => {
             { $group: { _id: null, mayor: { $max: '$festivos.id' } } }
         ])
         .toArray();
-    return resultado.length ? resultado[0].mayor : 0;
+    return (resultado.length && resultado[0].mayor) || 0;
+}
+
+//metodo que asigna id a los festivos que no lo tienen (por ejemplo, si la base de
+//datos se cargo con un script sin ids). Devuelve cuantos ids asigno.
+exports.asignarIdsFaltantes = async () => {
+    const tipos = await coleccion()
+        .find({ festivos: { $elemMatch: { id: { $exists: false } } } })
+        .toArray();
+    let siguiente = (await exports.obtenerMayorIdFestivo()) + 1;
+    let asignados = 0;
+    for (const tipo of tipos) {
+        const festivos = tipo.festivos.map((festivo) => {
+            if (festivo.id !== undefined) {
+                return festivo;
+            }
+            asignados++;
+            return { id: siguiente++, ...festivo };
+        });
+        await coleccion().updateOne({ _id: tipo._id }, { $set: { festivos } });
+    }
+    return asignados;
 }
 
 //metodo que agrega un festivo al arreglo festivos de un tipo

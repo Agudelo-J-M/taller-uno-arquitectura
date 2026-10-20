@@ -73,11 +73,12 @@ Cada carpeta corresponde a un componente del
 | Agregar un festivo | POST | `/api/festivos/agregar` | 201 con el festivo creado |
 | Modificar un festivo | PUT | `/api/festivos/modificar/:id` | 200 con el festivo modificado, o 404 |
 | Eliminar un festivo | DELETE | `/api/festivos/:id` | 200 con un mensaje, o 404 |
-| Verificar si una fecha es festiva | GET | `/api/festivos/verificar/:anio/:mes/:dia` | 200, o 400 si la fecha no existe |
+| Verificar si una fecha es festiva | GET | `/api/festivos/verificar/:anio/:mes/:dia` | 200 con texto plano: `Es Festivo`, `No es festivo` o `Fecha No valida` |
 | Listar los festivos de un año | GET | `/api/festivos/obtener/:anio` | 200 con las fechas ordenadas |
 
-Los datos de entrada no válidos responden 400 con un `mensaje` (y la lista de `errores`
-cuando son de formato).
+En las operaciones del CRUD, los datos de entrada no válidos responden 400 con un
+`mensaje` (y la lista de `errores` cuando son de formato). Verificar sigue los ejemplos
+del enunciado y siempre responde 200 en texto plano, incluso para una fecha no válida.
 
 ### Ejemplos
 
@@ -103,14 +104,12 @@ curl -X POST http://localhost:3030/api/festivos/agregar \
   -d '{"idTipo": 3, "nombre": "Domingo de Ramos", "diasPascua": -7}'
 ```
 
-Verificar una fecha:
+Verificar una fecha (los mismos casos del enunciado):
 
 ```bash
-curl http://localhost:3030/api/festivos/verificar/2026/4/3
-```
-
-```json
-{"fecha":"2026-04-03","esFestivo":true,"festivos":["Viernes Santo"]}
+curl http://localhost:3030/api/festivos/verificar/2023/6/12   # Es Festivo
+curl http://localhost:3030/api/festivos/verificar/2023/2/28   # No es festivo
+curl http://localhost:3030/api/festivos/verificar/2023/2/35   # Fecha No valida
 ```
 
 Listar los festivos de un año:
@@ -132,7 +131,15 @@ curl http://localhost:3030/api/festivos/obtener/2026
   guardan en 0.
 - **El tipo no se modifica.** Modificar reemplaza el nombre y los datos de cálculo del
   festivo dentro de su tipo. Para cambiarlo de tipo se elimina y se agrega de nuevo.
-- **Un día puede tener varios festivos.** Por eso verificar devuelve la lista `festivos`
-  con los nombres de los que caen en esa fecha.
+- **Un día puede tener varios festivos.** Por ejemplo, en 2025 el Sagrado Corazón y San
+  Pedro y San Pablo cayeron el mismo lunes (30 de junio). Listar los festivos del año
+  devuelve ambos.
+- **Nada de fechas quemadas.** Todas las fechas se calculan con los datos de la base de
+  datos, así que la API funciona con festivos agregados (por ejemplo, la Virgen de
+  Chiquinquirá) o con otra lista de festivos, siempre que use los 4 tipos con sus `id`
+  (1 a 4), porque el modo de cálculo se determina por el `id` del tipo.
+- **Ids de los festivos.** Las rutas del CRUD identifican cada festivo por su `id`. Si la
+  base de datos se carga con un script cuyos festivos no tienen `id`, la API se los
+  asigna al iniciar.
 - **Fechas en UTC.** Los cálculos usan fechas UTC para que el resultado no dependa de la
   zona horaria del servidor.

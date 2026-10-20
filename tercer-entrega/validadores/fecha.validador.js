@@ -11,10 +11,11 @@ exports.validarAnio = (req, res, next) => {
     next();
 }
 
+//Igual que una fecha que no existe, el enunciado espera texto plano con estado 200
 exports.validarFecha = (req, res, next) => {
     const { anio, mes, dia } = req.params;
     if (!ANIO.test(anio) || !NUMERO.test(mes) || !NUMERO.test(dia)) {
-        return res.status(400).send({ mensaje: 'El año, mes y día deben ser numéricos' });
+        return res.type('text').send('Fecha No valida');
     }
     next();
 }
